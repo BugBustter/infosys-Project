@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetWise Pro | AI Financial Suite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary: #00d2ff; --secondary: #3a7bd5; --accent: #ff007a;
+            --bg: #0f172a; --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc; --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        .hidden { display: none !important; }
+        .glass { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; padding: 25px 5%; position: sticky; top: 0; z-index: 100; background: rgba(15, 23, 42, 0.8); }
+        .logo { font-size: 1.8rem; font-weight: 800; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Dashboard Layout */
+        #dashboard-page { padding: 40px 5%; display: grid; grid-template-columns: 350px 1fr 300px; gap: 25px; }
+
+        /* Sidebar Inputs */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .input-group { margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; color: white; outline: none; }
+        input:focus { border-color: var(--primary); }
+
+        /* Main Feed */
+        .main-content { display: flex; flex-direction: column; gap: 25px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .stat-box { padding: 25px; text-align: center; }
+        .stat-box h2 { font-size: 2rem; margin-top: 10px; }
+
+        /* AI Advisor Box */
+        .ai-advisor { background: linear-gradient(135deg, rgba(58, 123, 213, 0.2), rgba(0, 210, 255, 0.2)); border: 1px solid var(--primary); padding: 20px; position: relative; overflow: hidden; }
+        .ai-advisor::before { content: "AI"; position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05; font-weight: 900; }
+
+        /* Chart Area */
+        .chart-container { display: flex; justify-content: center; align-items: center; padding: 20px; height: 250px; }
+        
+        /* Transaction List */
+        .transactions { max-height: 400px; overflow-y: auto; padding-right: 10px; }
+        .tx-item { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.03); margin-bottom: 10px; border-radius: 15px; transition: 0.3s; }
+        .tx-item:hover { background: rgba(255,255,255,0.08); transform: translateX(5px); }
+
+        /* Buttons */
+        .btn-glow { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); }
+        .btn-glow:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.6s ease forwards; }
+
+        @media (max-width: 1100px) { #dashboard-page { grid-template-columns: 1fr; } .sidebar { order: 2; } .main-content { order: 1; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">BudgetWise Pro</div>
+        <div id="nav-user-info" class="hidden">
+            <span id="display-name" style="margin-right: 15px; font-weight: 600;"></span>
+            <button onclick="logout()" style="background:none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 20px; cursor:pointer;">Logout</button>
+        </div>
+    </nav>
+
+    <section id="login-page" class="animate__animated animate__fadeIn" style="height: 80vh; display: flex; justify-content: center; align-items: center; padding: 20px;">
+        <div class="glass animate-in" style="width: 100%; max-width: 450px; padding: 40px;">
+            <h2 style="margin-bottom: 10px;">Smart Financial Access</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;">Initialize your AI spending profile.</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Preferred Name</label>
+                    <input type="text" id="username" placeholder="Alex Chen" required>
+                </div>
+                <div class="input-group">
+                    <label>Monthly Budget Goal ($)</label>
+                    <input type="number" id="userBudget" placeholder="2500" required>
+                </div>
+                <button type="submit" class="btn-glow" style="width: 100%;">Initialize Suite</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="dashboard-page" class="hidden">
+        
+        <aside class="sidebar animate-in">
+            <div class="glass" style="padding: 25px;">
+                <h3 style="margin-bottom: 20px;">New Transaction</h3>
+                <form id="expenseForm">
+                    <div class="input-group">
+                        <input type="text" id="expName" placeholder="Description (e.g. Netflix)" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="expAmount" placeholder="Amount ($)" required>
+                    </div>
+                    <div class="input-group">
+                        <select id="expCategory">
+                            <option value="Food">🍔 Food & Dining</option>
+                            <option value="Rent">🏠 Rent & Utilities</option>
+                            <option value="Travel">🚗 Transport</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Others">✨ Others</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-glow" style="width: 100%;">Log Expense</button>
+                </form>
+            </div>
+
+            <div class="glass ai-advisor" id="ai-box">
+                <h4>🤖 AI Budget Advisor</h4>
+                <p id="ai-suggestion" style="font-size: 0.9rem; margin-top: 10px; line-height: 1.4; color: #cbd5e1;">
+                    Analyzing your data... log some expenses to get AI insights.
+                </p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="stats-grid">
+                <div class="glass stat-box animate-in" style="border-bottom: 4px solid var(--primary);">
+                    <p style="color: #94a3b8;">Total Spent</p>
+                    <h2 id="totalDisplay">$0.00</h2>
+                </div>
+                <div class="glass stat-box animate-in" style="border-bottom: 4px solid var(--accent);">
+                    <p style="color: #94a3b8;">Budget Remaining</p>
+                    <h2 id="remainingDisplay">$0.00</h2>
+                </div>
+            </div>
+
+            <div class="glass animate-in" style="padding: 25px;">
+                <div style="display:flex; justify-content: space-between; align-items:center;">
+                    <h3>Spending Breakdown</h3>
+                    <input type="text" id="searchBar" placeholder="Search transactions..." style="width: 200px; padding: 8px;">
+                </div>
+                <div class="chart-container">
+                    <svg width="200" height="200" viewBox="0 0 42 42" id="donut-chart">
+                        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="4"></circle>
+                        <circle id="chart-segment" cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--primary)" stroke-width="4" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+                    </svg>
+                </div>
+                <div class="transactions" id="expenseList">
+                    </div>
+            </div>
+        </main>
+
+        <aside class="sidebar animate-in">
+            <div class="glass" style="padding: 20px;">
+                <h4>Financial Health</h4>
+                <div style="margin-top: 20px;">
+                    <p style="font-size: 0.8rem; margin-bottom: 5px;">Budget Usage</p>
+                    <div style="height: 8px; background: #334155; border-radius: 4px; overflow:hidden;">
+                        <div id="budget-progress" style="height: 100%; background: var(--primary); width: 0%; transition: 0.5s;"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <script>
+        // --- State Management ---
+        let state = {
+            user: JSON.parse(localStorage.getItem('bw_pro_user')) || null,
+            expenses: JSON.parse(localStorage.getItem('bw_expenses')) || []
+        };
+
+        // --- Initialization ---
+        window.onload = () => {
+            if (state.user) {
+                renderDashboard();
+            } else {
+                showSection('login-page');
+            }
+        };
+
+        // --- Auth Logic ---
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const userData = {
+                name: document.getElementById('username').value,
+                monthlyGoal: parseFloat(document.getElementById('userBudget').value)
+            };
+            localStorage.setItem('bw_pro_user', JSON.stringify(userData));
+            state.user = userData;
+            renderDashboard();
+        });
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function showSection(id) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('dashboard-page').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // --- Dashboard Core ---
+        function renderDashboard() {
+            showSection('dashboard-page');
+            document.getElementById('nav-user-info').classList.remove('hidden');
+            document.getElementById('display-name').innerText = `Hello, ${state.user.name}`;
+            
+            updateUI();
+        }
+
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const exp = {
+                id: Date.now(),
+                name: document.getElementById('expName').value,
+                amount: parseFloat(document.getElementById('expAmount').value),
+                category: document.getElementById('expCategory').value,
+                date: new Date().toLocaleDateString()
+            };
+            state.expenses.unshift(exp);
+            localStorage.setItem('bw_expenses', JSON.stringify(state.expenses));
+            e.target.reset();
+            updateUI();
+        });
+
+        function updateUI() {
+            const list = document.getElementById('expenseList');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const remainingDisplay = document.getElementById('remainingDisplay');
+            const progress = document.getElementById('budget-progress');
+            
+            let total = 0;
+            list.innerHTML = '';
+
+            state.expenses.forEach(exp => {
+                total += exp.amount;
+                const div = document.createElement('div');
+                div.className = 'tx-item animate__animated animate__fadeInLeft';
+                div.innerHTML = `
+                    <div>
+                        <strong>${exp.name}</strong><br>
+                        <small style="color: #94a3b8;">${exp.date} • ${exp.category}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: var(--primary); font-weight: bold;">$${exp.amount.toFixed(2)}</span><br>
+                        <button onclick="deleteExp(${exp.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.7rem;">Remove</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            // Update Stats
+            totalDisplay.innerText = `$${total.toFixed(2)}`;
+            const remaining = state.user.monthlyGoal - total;
+            remainingDisplay.innerText = `$${remaining.toFixed(2)}`;
+            remainingDisplay.style.color = remaining < 0 ? '#ef4444' : '#10b981';
+
+            // Progress Bar
+            const percent = Math.min((total / state.user.monthlyGoal) * 100, 100);
+            progress.style.width = percent + '%';
+            progress.style.background = percent > 85 ? '#ef4444' : 'var(--primary)';
+
+            runAIAdvisor(total, remaining);
+            updateChart(percent);
+        }
+
+        function deleteExp(id) {
+            state.expenses = state.expenses.filter(e => e.id !== id);
+            localStorage.setItem('bw_expenses', JSON.stringify(state.expenses));
+            updateUI();
+        }
+
+        // --- AI Advisor Logic ---
+        function runAIAdvisor(total, remaining) {
+            const adviceBox = document.getElementById('ai-suggestion');
+            const percent = (total / state.user.monthlyGoal) * 100;
+
+            if (state.expenses.length === 0) {
+                adviceBox.innerText = "Welcome! Add your first transaction to trigger AI analysis.";
+                return;
+            }
+
+            if (percent > 100) {
+                adviceBox.innerText = "🚨 CRITICAL: You have exceeded your budget by $" + Math.abs(remaining).toFixed(2) + ". I recommend cutting 'Shopping' expenses immediately.";
+                adviceBox.parentElement.style.borderColor = "#ef4444";
+            } else if (percent > 80) {
+                adviceBox.innerText = "⚠️ WARNING: You've used " + percent.toFixed(0) + "% of your budget. Slow down on non-essential categories.";
+                adviceBox.parentElement.style.borderColor = "#f59e0b";
+            } else {
+                adviceBox.innerText = "✅ HEALTHY: You're on track! At this rate, you'll save $" + remaining.toFixed(0) + " this month. Consider moving it to a high-yield account.";
+                adviceBox.parentElement.style.borderColor = "var(--primary)";
+            }
+        }
+
+        // --- SVG Chart Logic ---
+        function updateChart(percent) {
+            const segment = document.getElementById('chart-segment');
+            segment.setAttribute('stroke-dasharray', `${percent} 100`);
+        }
+
+        // --- Search Logic ---
+        document.getElementById('searchBar').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.tx-item');
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        });
+
+    </script>
+</body>
+</html> 
+
+
