@@ -1,5 +1,5 @@
 
-# BudgetWise AI: Intelligent Expense Tracking & Financial Visualization
+# Infosys _BudgetWise AI Driven Expense Tracker and Budget Advisor
 
 ## 📺 Demo & Deployment
 
@@ -185,6 +185,8 @@ npm run dev
 * [ ] **Recurring Payments:** Automated logic for subscription tracking.
 * [ ] **Export Features:** Download financial reports as PDF/CSV directly from the React UI.
 * [ ] **Multi-Currency Support:** Live currency conversion for international travelers.
+
+ **🚀 Linkedin:** [Click Here](www.linkedin.com/in/amit-yadav-020878284)
 
 ---
 *Built with ❤️ for financial freedom.*
